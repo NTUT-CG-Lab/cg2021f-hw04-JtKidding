@@ -104,9 +104,12 @@
 				'眉上' : ['eyebrow_raised', -1],
 				'まばたき' : ['eye_wink', -1],
 				'ウィンク' : ['eye_wink', -1],
+				'ウィンク右' : ['eye_wink', -1],
 				'笑い' : ['eye_happy_wink', -1],
 				'なごみ' : ['eye_relaxed', -1],
 				'ジト目' : ['eye_unimpressed', -1],
+				'じと' : ['eye_unimpressed', -1],
+				'じと目' : ['eye_unimpressed', -1],
 				'下瞼上げ' : ['eye_raised_lower_eyelid', -1],
 				'びっくり' : ['eye_surprised', -1],
 				'瞳小' : ['iris_small', -1],
@@ -116,6 +119,7 @@
 				'え' : ['mouth_eee', -1],
 				'お' : ['mouth_ooo', -1],
 				'Δ' : ['mouth_delta', -1],
+				'▲' : ['mouth_delta', -1],
 				'はんっ！' : ['mouth_smirk', -1],
 				'口角上げ' : ['mouth_raised_corner', -1],
 				'口角下げ' : ['mouth_lowered_corner', -1]
@@ -322,7 +326,7 @@
 						const fileName = ['kizunaai.pmx', 
 						'『天宮こころ(Kokoro Amamiya)』.pmx', 
 						'物述有栖.pmx'];
-						save_json[i] = {'location': fileName[i]};
+						save_json[i] = {'location': modelFiles[i]};
 						poses[i] = gui.addFolder( 'Poses' + (i+1));
 						morphs[i] = gui.addFolder( fileName[i] );
 
@@ -402,7 +406,6 @@
 							mesh.morphTargetInfluences[ i ] = value;
 
 						}
-						console.log(controls);
 
 					}
 
@@ -447,16 +450,42 @@
 						controls2[i][key] = -1;
 						save_json[i][key] = -1;
 					}
-
+					
 					for (const key2 in standardlist) {
-						
+						let temp = null;
 						for (const key in model_data[i]) {
-							if (key2.indexOf(model_data[i][key][0]) != -1) {
+							if (key2.indexOf(model_data[i][key][0]) != -1 ) {
+								
 								controls2[i][key2] = model_data[i][key][1];
 								save_json[i][key2] = model_data[i][key][1];
+								if (key2.indexOf('right') != -1 && temp != null) {
+									controls2[i][key2] = temp;
+									save_json[i][key2] = temp;
+									if (key.indexOf('右') != -1) {
+
+										let temp2 = key2.replace('right', '');
+										temp2 = temp2 + 'left';
+										controls2[i][temp2] = temp;
+										save_json[i][temp2] = temp;
+									}
+									// console.log('index', temp2, save_json[i][temp2]);
+								}
+								temp = model_data[i][key][1];
+								// console.log('temp', temp, key, key2);
 							}
 						}
 					}
+					let num = 0;
+					let temp = {};
+					for (const key in save_json[i]) {
+						if (key.indexOf('location') == -1) {
+							temp[num.toString()] = save_json[i][key];
+							num++;
+						} else {
+							temp[key] = save_json[i][key];
+						}
+					}
+					save_json[i] = temp;
 
 					for (const key in standardlist) {
 	
@@ -471,7 +500,6 @@
 				}
 
 				function onChangeMorph() {
-					console.log(controls2);
 					for( let i = 0; i < Object.keys(standardlist).length; i++){
 						const key = standardlist[i];
 						const value = controls2[currentMesh][key];
